@@ -16,9 +16,6 @@
   <main>
     <section class="balance-card">
       <div><p class="eyebrow">AVAILABLE BALANCE</p><h2><span id="balance">0</span> <small>minutes</small></h2><p id="balance-human" class="muted">0 hours 0 minutes</p><p id="earned-today" class="muted"></p></div>
-      <div class="balance-controls"><p class="control-label">Gaming time used / manual adjustment</p><div class="button-row">
-        <button data-balance="-60" class="adjust danger">−1 hour</button><button data-balance="-15" class="adjust danger">−15 min</button><button data-balance="15" class="adjust">+15 min</button><button data-balance="60" class="adjust">+1 hour</button>
-      </div></div>
     </section>
     <section class="panel">
       <div class="section-heading"><div><h2>Report an activity</h2><p class="muted">Choose an activity and add time in 15-minute chunks.</p></div></div>
@@ -29,7 +26,12 @@
       <div id="history" class="history"></div><p id="empty-history" class="empty">Nothing recorded yet.</p>
     </section>
     <section id="admin-panel" class="panel hidden">
-      <div class="section-heading"><div><h2>Admin settings</h2><p class="muted">Create activities and set gaming minutes earned per 15 minutes of activity.</p></div></div>
+      <div class="section-heading"><div><h2>Admin settings</h2><p class="muted">Adjust the balance, create activities and set gaming minutes earned per 15 minutes of activity.</p></div></div>
+      <div class="manual-adjust">
+        <div><h3>Manual adjustment</h3><p class="hint">Use minus for gaming time used. Not counted toward the daily earning limit.</p></div>
+        <div class="activity-controls"><button id="adjust-minus-hour" class="minus" type="button">−1h</button><button id="adjust-minus" class="minus" type="button">−15m</button><div class="chunk-count"><span id="adjust-pending">0</span><small>min</small></div><button id="adjust-plus" class="plus" type="button">+15m</button><button id="adjust-plus-hour" class="plus" type="button">+1h</button></div>
+        <button id="apply-adjust" type="button">Apply adjustment</button>
+      </div>
       <form id="activity-form" class="admin-form">
         <label>Activity name<input id="activity-name" type="text" maxlength="40" placeholder="e.g. Walking" required></label>
         <label>Gaming minutes earned per 15 min<input id="activity-ratio" type="number" min="0" max="240" step="5" value="15" required></label>
@@ -41,11 +43,12 @@
         <label>Daily earning limit (minutes)<input id="daily-cap" type="number" min="0" max="100000" step="15" value="120"><span class="hint">Max gaming minutes earned from activities per day. Resets at midnight. Set to 0 for no limit.</span></label>
       </div>
       <div class="admin-actions"><button id="export-data" class="secondary" type="button">Export backup (JSON)</button><label class="import-label secondary">Import backup<input id="import-data" type="file" accept="application/json"></label><button id="reset-all" class="danger" type="button">Reset all data</button></div>
-      <p class="hint">Important: this lightweight prototype has no authentication. Admin settings are not password-protected, and browser storage is not shared across devices. Anyone who can open the page can change settings or data.</p>
+      <p class="hint">Important: the admin password is checked in the browser only. It is stored as a hash, but anyone with browser developer tools can still bypass the check or edit the stored data. Browser storage is not shared across devices.</p>
     </section>
   </main>
   <footer><p>Made for a family agreement, not surveillance. Agree on the rules together.</p></footer>
   <dialog id="edit-dialog"><form method="dialog" id="edit-form"><h2>Edit activity</h2><input id="edit-id" type="hidden"><label>Activity name<input id="edit-name" type="text" maxlength="40" required></label><label>Gaming minutes per 15 min<input id="edit-ratio" type="number" min="0" max="240" step="5" required></label><div class="dialog-actions"><button value="cancel" class="secondary">Cancel</button><button id="save-edit" value="save">Save</button></div></form></dialog>
+  <dialog id="password-dialog"><form method="dialog" id="password-form"><h2>Admin password</h2><label>Password<input id="admin-password" type="password" autocomplete="current-password" required></label><p id="password-error" class="hint error hidden">Wrong password.</p><div class="dialog-actions"><button id="password-cancel" class="secondary" type="button">Cancel</button><button value="unlock">Unlock</button></div></form></dialog>
   <div id="toast" role="status" aria-live="polite"></div><script src="app.js"></script>
 </body>
 </html>

@@ -1,6 +1,9 @@
 (() => {
   "use strict";
   const STORAGE_KEY = "activityGamingTracker.v1";
+  // PBKDF2-SHA256 of the admin password; the plain password is not stored in the source.
+  const ADMIN_PASSWORD_HASH = "15adaf09817b9c0f4c2a07d081a488f3136bd90081f17f0ff9b1d15da89b288c";
+  const ADMIN_PASSWORD_SALT = "move-more-play-fair.admin", ADMIN_PASSWORD_ITERATIONS = 200000;
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const defaultState = () => ({
     balance: 0, cap: 7200, dailyCap: 1800,
@@ -128,14 +131,44 @@
     applyTheme(theme);
     try { localStorage.setItem(THEME_KEY, theme); } catch {}
   });
+  function setAdminOpen(open) {
+    $("admin-panel").classList.toggle("hidden", !open);
+    $("admin-toggle").textContent = open ? "Hide admin" : "Admin settings";
+    if (open) $("admin-panel").scrollIntoView({ behavior:"smooth", block:"start" });
+    else { pendingAdjust = 0; updateAdjust(); }
+  }
   $("admin-toggle").addEventListener("click", () => {
-    const panel = $("admin-panel"); panel.classList.toggle("hidden");
-    $("admin-toggle").textContent = panel.classList.contains("hidden") ? "Admin settings" : "Hide admin";
-    if (!panel.classList.contains("hidden")) panel.scrollIntoView({ behavior:"smooth", block:"start" });
+    if (!$("admin-panel").classList.contains("hidden")) return setAdminOpen(false);
+    $("admin-password").value = ""; $("password-error").classList.add("hidden"); $("password-dialog").showModal();
   });
-  document.querySelectorAll("[data-balance]").forEach(button => button.addEventListener("click", () => {
-    const delta = Number(button.dataset.balance); applyDelta(delta, delta < 0 ? "Gaming time used / adjustment" : "Manual balance adjustment");
-  }));
+  async function hashPassword(password) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:enc.encode(ADMIN_PASSWORD_SALT), iterations:ADMIN_PASSWORD_ITERATIONS }, key, 256);
+    return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  $("password-form").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!crypto.subtle) return notify("Admin login needs the site to be opened over HTTPS.");
+    if (await hashPassword($("admin-password").value) !== ADMIN_PASSWORD_HASH) {
+      $("password-error").classList.remove("hidden"); $("admin-password").select(); return;
+    }
+    $("password-dialog").close(); setAdminOpen(true);
+  });
+  $("password-cancel").addEventListener("click", () => $("password-dialog").close());
+  let pendingAdjust = 0;
+  function updateAdjust() {
+    $("adjust-pending").textContent = `${pendingAdjust > 0 ? "+" : ""}${pendingAdjust}`;
+    $("apply-adjust").disabled = pendingAdjust === 0;
+  }
+  [["adjust-minus-hour", -60], ["adjust-minus", -15], ["adjust-plus", 15], ["adjust-plus-hour", 60]].forEach(([id, step]) =>
+    $(id).addEventListener("click", () => { pendingAdjust += step; updateAdjust(); }));
+  $("apply-adjust").addEventListener("click", () => {
+    if (!pendingAdjust) return;
+    applyDelta(pendingAdjust, pendingAdjust < 0 ? "Gaming time used / adjustment" : "Manual balance adjustment");
+    pendingAdjust = 0; updateAdjust();
+  });
+  updateAdjust();
   $("activity-form").addEventListener("submit", event => {
     event.preventDefault(); const name = $("activity-name").value.trim(), ratio = Number($("activity-ratio").value);
     if (!name || !Number.isFinite(ratio) || ratio < 0 || ratio > 240) return notify("Enter a name and a ratio between 0 and 240.");
