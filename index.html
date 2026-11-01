@@ -15,7 +15,7 @@
   </header>
   <main>
     <section class="balance-card">
-      <div><p class="eyebrow">AVAILABLE BALANCE</p><h2><span id="balance">0</span> <small>minutes</small></h2><p id="balance-human" class="muted">0 hours 0 minutes</p></div>
+      <div><p class="eyebrow">AVAILABLE BALANCE</p><h2><span id="balance">0</span> <small>minutes</small></h2><p id="balance-human" class="muted">0 hours 0 minutes</p><p id="earned-today" class="muted"></p></div>
       <div class="balance-controls"><p class="control-label">Gaming time used / manual adjustment</p><div class="button-row">
         <button data-balance="-60" class="adjust danger">−1 hour</button><button data-balance="-15" class="adjust danger">−15 min</button><button data-balance="15" class="adjust">+15 min</button><button data-balance="60" class="adjust">+1 hour</button>
       </div></div>
@@ -38,7 +38,7 @@
       <div id="admin-activities" class="admin-activities"></div>
       <div class="settings-grid">
         <label>Maximum saved balance (minutes)<input id="balance-cap" type="number" min="0" max="100000" step="15" value="180"><span class="hint">Set to 0 for no cap.</span></label>
-        <label>Daily gaming limit (minutes, optional)<input id="daily-cap" type="number" min="0" max="1440" step="15" value="120"><span class="hint">Reminder only; actual play time is not tracked.</span></label>
+        <label>Daily earning limit (minutes)<input id="daily-cap" type="number" min="0" max="100000" step="15" value="120"><span class="hint">Max gaming minutes earned from activities per day. Resets at midnight. Set to 0 for no limit.</span></label>
       </div>
       <div class="admin-actions"><button id="export-data" class="secondary" type="button">Export backup (JSON)</button><label class="import-label secondary">Import backup<input id="import-data" type="file" accept="application/json"></label><button id="reset-all" class="danger" type="button">Reset all data</button></div>
       <p class="hint">Important: this lightweight prototype has no authentication. Admin settings are not password-protected, and browser storage is not shared across devices. Anyone who can open the page can change settings or data.</p>

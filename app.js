@@ -44,20 +44,36 @@
     else if (delta < 0 && actual > delta) notify("Balance cannot go below zero.");
     else notify(`${actual >= 0 ? "+" : ""}${actual} min · ${description}`);
   }
+  function todayKey() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+  function earnedToday() { return state.earnedDay === todayKey() ? Number(state.earnedToday) || 0 : 0; }
+  function dailyRemaining() { return Number(state.dailyCap) > 0 ? Math.max(0, Number(state.dailyCap) - earnedToday()) : Infinity; }
   function reportActivity(id, chunks) {
     const activity = state.activities.find(a => a.id === id); if (!activity) return;
     if (chunks <= 0) return notify("Choose at least one 15-minute chunk.");
     const activityMinutes = chunks * 15, earned = chunks * Number(activity.ratio);
+    const remaining = dailyRemaining();
+    if (earned > 0 && remaining === 0) return notify("Daily limit reached. You can earn more after midnight.");
     const before = state.balance;
-    let after = before + earned;
+    let after = before + Math.min(earned, remaining);
     if (Number(state.cap) > 0) after = Math.min(after, Number(state.cap));
     const actual = after - before; state.balance = after;
+    state.earnedToday = earnedToday() + actual; state.earnedDay = todayKey();
     addHistory(`${activity.name} · ${activityMinutes} min`, actual);
-    save(); notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min`);
+    save();
+    if (actual < earned) notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min (${remaining < earned ? "daily limit" : "balance cap"} reached)`);
+    else notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min`);
+  }
+  function renderEarnedToday() {
+    $("earned-today").textContent = Number(state.dailyCap) > 0 ? `Earned today: ${earnedToday()} / ${Number(state.dailyCap)} min` : `Earned today: ${earnedToday()} min`;
+  }
+  function scheduleMidnightReset() {
+    const next = new Date(); next.setHours(24, 0, 1, 0);
+    setTimeout(() => { renderEarnedToday(); scheduleMidnightReset(); }, next - Date.now());
   }
   function render() {
     $("balance").textContent = state.balance; $("balance-human").textContent = formatTime(state.balance);
     $("balance-cap").value = state.cap; $("daily-cap").value = state.dailyCap;
+    renderEarnedToday();
     const list = $("activity-list"); list.innerHTML = "";
     $("empty-activities").classList.toggle("hidden", state.activities.length > 0);
     state.activities.forEach(activity => {
@@ -100,6 +116,18 @@
   function openEdit(activity) {
     $("edit-id").value = activity.id; $("edit-name").value = activity.name; $("edit-ratio").value = activity.ratio; $("edit-dialog").showModal();
   }
+  const THEME_KEY = "activityGamingTracker.theme";
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $("theme-toggle").textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0a0e18" : "#172033";
+  }
+  applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+  $("theme-toggle").addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  });
   $("admin-toggle").addEventListener("click", () => {
     const panel = $("admin-panel"); panel.classList.toggle("hidden");
     $("admin-toggle").textContent = panel.classList.contains("hidden") ? "Admin settings" : "Hide admin";
@@ -116,18 +144,6 @@
   $("edit-form").addEventListener("submit", event => {
     if (event.submitter?.value !== "save") return;
     event.preventDefault(); const activity = state.activities.find(a => a.id === $("edit-id").value);
-  const THEME_KEY = "activityGamingTracker.theme";
-  function applyTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    $("theme-toggle").textContent = theme === "dark" ? "Light mode" : "Dark mode";
-    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0a0e18" : "#172033";
-  }
-  applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
-  $("theme-toggle").addEventListener("click", () => {
-    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    applyTheme(theme);
-    try { localStorage.setItem(THEME_KEY, theme); } catch {}
-  });
     const name = $("edit-name").value.trim(), ratio = Number($("edit-ratio").value);
     if (!activity || !name || !Number.isFinite(ratio) || ratio < 0 || ratio > 240) return notify("Check the activity details.");
     activity.name = name; activity.ratio = ratio; $("edit-dialog").close(); save(); notify("Activity updated.");
@@ -161,4 +177,6 @@
     finally { event.target.value = ""; }
   });
   render();
+  scheduleMidnightReset();
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) renderEarnedToday(); });
 })();
