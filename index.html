@@ -42,7 +42,7 @@
         <label>Maximum saved balance (minutes)<input id="balance-cap" type="number" min="0" max="100000" step="15" value="180"><span class="hint">Set to 0 for no cap.</span></label>
         <label>Daily earning limit (minutes)<input id="daily-cap" type="number" min="0" max="100000" step="15" value="120"><span class="hint">Max gaming minutes earned from activities per day. Resets at midnight. Set to 0 for no limit.</span></label>
       </div>
-      <div class="admin-actions"><button id="export-data" class="secondary" type="button">Export backup (JSON)</button><label class="import-label secondary">Import backup<input id="import-data" type="file" accept="application/json"></label><button id="reset-all" class="danger" type="button">Reset all data</button></div>
+      <div class="admin-actions"><button id="export-data" class="secondary" type="button">Export backup (JSON)</button><label class="import-label secondary">Import backup<input id="import-data" type="file" accept="application/json"></label><button id="reset-balance" class="danger" type="button">Reset balance</button><button id="reset-all" class="danger" type="button">Reset all data</button></div>
       <p class="hint">Important: the admin password is checked in the browser only. It is stored as a hash, but anyone with browser developer tools can still bypass the check or edit the stored data. Browser storage is not shared across devices.</p>
     </section>
   </main>

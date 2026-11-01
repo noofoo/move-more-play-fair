@@ -195,6 +195,11 @@
     if (!confirm("Clear the activity log? Your balance will not change.")) return;
     state.history = []; save(); notify("Log cleared.");
   });
+  $("reset-balance").addEventListener("click", () => {
+    if (state.balance === 0) return notify("Balance is already 0.");
+    if (!confirm(`Reset the balance from ${state.balance} minutes to 0? Activities, settings and history are kept.`)) return;
+    addHistory("Balance reset", -state.balance); state.balance = 0; save(); notify("Balance reset to 0.");
+  });
   $("reset-all").addEventListener("click", () => {
     if (!confirm("Reset all activities, balance, settings and history? This cannot be undone unless you exported a backup.")) return;
     state = defaultState(); save(); notify("All data reset.");
