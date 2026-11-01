@@ -33,6 +33,10 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2400);
   }
   function formatTime(minutes) { const n = Math.max(0, Math.round(minutes)); return `${Math.floor(n / 60)} hours ${n % 60} minutes`; }
+  function formatDateTime(date) {
+    const pad = n => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} · ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
   function addHistory(description, delta) {
     state.history.unshift({ id: uid(), description, delta, at: new Date().toISOString() });
     state.history = state.history.slice(0, 100);
@@ -112,7 +116,7 @@
     $("empty-history").classList.toggle("hidden", state.history.length > 0);
     state.history.slice(0, 30).forEach(entry => {
       const item = document.createElement("div"); item.className = "history-item"; const date = new Date(entry.at);
-      item.innerHTML = `<div><strong>${esc(entry.description)}</strong><div class="meta">${date.toLocaleDateString()} · ${date.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</div></div><div class="delta ${entry.delta >= 0 ? "positive" : "negative"}">${entry.delta >= 0 ? "+" : ""}${entry.delta} min</div>`;
+      item.innerHTML = `<div><strong>${esc(entry.description)}</strong><div class="meta">${formatDateTime(date)}</div></div><div class="delta ${entry.delta >= 0 ? "positive" : "negative"}">${entry.delta >= 0 ? "+" : ""}${entry.delta} min</div>`;
       history.appendChild(item);
     });
   }
