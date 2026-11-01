@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172033">
+  <title>Activity → Gaming Time</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">MOVE MORE · PLAY FAIR</p><h1>Activity → Gaming Time</h1></div>
+    <button id="admin-toggle" class="secondary">Admin settings</button>
+  </header>
+  <main>
+    <section class="balance-card">
+      <div><p class="eyebrow">AVAILABLE BALANCE</p><h2><span id="balance">0</span> <small>minutes</small></h2><p id="balance-human" class="muted">0 hours 0 minutes</p></div>
+      <div class="balance-controls"><p class="control-label">Gaming time used / manual adjustment</p><div class="button-row">
+        <button data-balance="-60" class="adjust danger">−1 hour</button><button data-balance="-15" class="adjust danger">−15 min</button><button data-balance="15" class="adjust">+15 min</button><button data-balance="60" class="adjust">+1 hour</button>
+      </div></div>
+    </section>
+    <section class="panel">
+      <div class="section-heading"><div><h2>Report an activity</h2><p class="muted">Choose an activity and add time in 15-minute chunks.</p></div></div>
+      <div id="activity-list" class="activity-grid"></div><p id="empty-activities" class="empty hidden">No activities yet. An admin can add them in Admin settings.</p>
+    </section>
+    <section class="panel">
+      <div class="section-heading"><div><h2>Recent activity</h2><p class="muted">A simple shared log. Entries are stored in this browser.</p></div><button id="clear-log" class="text-button">Clear log</button></div>
+      <div id="history" class="history"></div><p id="empty-history" class="empty">Nothing recorded yet.</p>
+    </section>
+    <section id="admin-panel" class="panel hidden">
+      <div class="section-heading"><div><h2>Admin settings</h2><p class="muted">Create activities and set gaming minutes earned per 15 minutes of activity.</p></div></div>
+      <form id="activity-form" class="admin-form">
+        <label>Activity name<input id="activity-name" type="text" maxlength="40" placeholder="e.g. Walking" required></label>
+        <label>Gaming minutes earned per 15 min<input id="activity-ratio" type="number" min="0" max="240" step="5" value="15" required></label>
+        <button type="submit">Add activity</button>
+      </form>
+      <div id="admin-activities" class="admin-activities"></div>
+      <div class="settings-grid">
+        <label>Maximum saved balance (minutes)<input id="balance-cap" type="number" min="0" max="100000" step="15" value="180"><span class="hint">Set to 0 for no cap.</span></label>
+        <label>Daily gaming limit (minutes, optional)<input id="daily-cap" type="number" min="0" max="1440" step="15" value="120"><span class="hint">Reminder only; actual play time is not tracked.</span></label>
+      </div>
+      <div class="admin-actions"><button id="export-data" class="secondary" type="button">Export backup (JSON)</button><label class="import-label secondary">Import backup<input id="import-data" type="file" accept="application/json"></label><button id="reset-all" class="danger" type="button">Reset all data</button></div>
+      <p class="hint">Important: this lightweight prototype has no authentication. Admin settings are not password-protected, and browser storage is not shared across devices. Anyone who can open the page can change settings or data.</p>
+    </section>
+  </main>
+  <footer><p>Made for a family agreement, not surveillance. Agree on the rules together.</p></footer>
+  <dialog id="edit-dialog"><form method="dialog" id="edit-form"><h2>Edit activity</h2><input id="edit-id" type="hidden"><label>Activity name<input id="edit-name" type="text" maxlength="40" required></label><label>Gaming minutes per 15 min<input id="edit-ratio" type="number" min="0" max="240" step="5" required></label><div class="dialog-actions"><button value="cancel" class="secondary">Cancel</button><button id="save-edit" value="save">Save</button></div></form></dialog>
+  <div id="toast" role="status" aria-live="polite"></div><script src="app.js"></script>
+</body>
+</html>
