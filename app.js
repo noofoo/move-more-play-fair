@@ -55,15 +55,15 @@
     if (chunks <= 0) return notify("Choose at least one 15-minute chunk.");
     const activityMinutes = chunks * 15, earned = chunks * Number(activity.ratio);
     const remaining = dailyRemaining();
-    if (earned > 0 && remaining === 0) return notify("Daily limit reached. You can earn more after midnight.");
     const before = state.balance;
     let after = before + Math.min(earned, remaining);
     if (Number(state.cap) > 0) after = Math.min(after, Number(state.cap));
     const actual = after - before; state.balance = after;
     state.earnedToday = earnedToday() + actual; state.earnedDay = todayKey();
-    addHistory(`${activity.name} · ${activityMinutes} min`, actual);
+    const limitNote = actual < earned ? ` (${remaining < earned ? "daily limit" : "balance cap"} reached)` : "";
+    addHistory(`${activity.name} · ${activityMinutes} min${limitNote}`, actual);
     save();
-    if (actual < earned) notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min (${remaining < earned ? "daily limit" : "balance cap"} reached)`);
+    if (limitNote) notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min${limitNote}`);
     else notify(`Recorded ${activityMinutes} min ${activity.name}; +${actual} gaming min`);
   }
   function renderEarnedToday() {
