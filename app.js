@@ -116,6 +116,18 @@
   $("edit-form").addEventListener("submit", event => {
     if (event.submitter?.value !== "save") return;
     event.preventDefault(); const activity = state.activities.find(a => a.id === $("edit-id").value);
+  const THEME_KEY = "activityGamingTracker.theme";
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $("theme-toggle").textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0a0e18" : "#172033";
+  }
+  applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+  $("theme-toggle").addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  });
     const name = $("edit-name").value.trim(), ratio = Number($("edit-ratio").value);
     if (!activity || !name || !Number.isFinite(ratio) || ratio < 0 || ratio > 240) return notify("Check the activity details.");
     activity.name = name; activity.ratio = ratio; $("edit-dialog").close(); save(); notify("Activity updated.");

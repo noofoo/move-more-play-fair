@@ -1,16 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#172033">
   <title>Activity → Gaming Time</title>
+  <script>try{var t=localStorage.getItem("activityGamingTracker.theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
     <div><p class="eyebrow">MOVE MORE · PLAY FAIR</p><h1>Activity → Gaming Time</h1></div>
-    <button id="admin-toggle" class="secondary">Admin settings</button>
+    <div class="topbar-actions"><button id="theme-toggle" class="secondary" type="button">Light mode</button><button id="admin-toggle" class="secondary">Admin settings</button></div>
   </header>
   <main>
     <section class="balance-card">
